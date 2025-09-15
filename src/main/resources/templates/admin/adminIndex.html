@@ -674,10 +674,15 @@
     <!-- ML Forecast Tab -->
     <div id="forecast" class="tab-content">
         <div class="forecast-card">
-            <div class="forecast-title">Next Hour Demand Prediction</div>
-            <div class="forecast-value">1,387 kWh</div>
-            <div class="forecast-subtitle">Confidence: 94.2%</div>
+            <div class="forecast-title">Next Day Demand Prediction</div>
+            <div class="forecast-value" id="prediction-value"
+                 th:text="${#numbers.formatDecimal(prediction, 1, 2)} + ' kWh'">
+                -- kWh
+            </div>
+
+            <!--            <div class="forecast-subtitle" id="prediction-confidence" th:text="'Confidence: ' + ${confidence} + '%'">Confidence: &#45;&#45;%</div>-->
         </div>
+
 
         <div class="ml-section">
             <div class="chart-header">
@@ -717,6 +722,24 @@
             console.error('Error refreshing dashboard:', err);
         }
     }
+
+    async function refreshPrediction() {
+        try {
+            const response = await fetch('/admin/next-day-prediction');
+            const data = await response.json();
+
+            document.getElementById('prediction-value').innerText = data.prediction.toLocaleString() + " kWh";
+            document.getElementById('prediction-confidence').innerText = "Confidence: " + data.confidence + "%";
+        } catch (err) {
+            console.error('Error fetching prediction:', err);
+        }
+    }
+
+    // Refresh every hour (3600000 ms)
+    setInterval(refreshPrediction, 3600000);
+
+    // Optional: refresh immediately on page load
+    refreshPrediction();
 
     // Refresh every 5 seconds
     setInterval(refreshDashboard, 5000);
