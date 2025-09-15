@@ -1,8 +1,7 @@
 package com.example.smartgridmetering.Controller;
 
-import com.example.smartgridmetering.Model.EnergyConsumption;
 import com.example.smartgridmetering.Model.User;
-import com.example.smartgridmetering.Repository.EnergyConsumptionRepository;
+//import com.example.smartgridmetering.Repository.EnergyConsumptionRepository;
 import org.springframework.ui.Model;
 import com.example.smartgridmetering.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +18,7 @@ import java.util.stream.Stream;
 public class UserController {
 
     @Autowired private UserService userService;
-    @Autowired private EnergyConsumptionRepository energyRepo;
+//    @Autowired private EnergyConsumptionRepository energyRepo;
 
     @GetMapping("/user")
     public String dashboard(Model model, Principal principal) {

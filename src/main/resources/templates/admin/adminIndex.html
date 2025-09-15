@@ -395,7 +395,7 @@
     <div class="header">
         <div class="logo">Smart Grid Admin</div>
         <div class="user-info">
-            <span>Welcome, Admin</span>
+            <div class="user-greeting" th:text="'Welcome back, ' + ${admin.name}"></div>
             <form action="/logout" method="post">
                 <button type="submit">Logout</button>
             </form>
@@ -414,25 +414,39 @@
     <!-- Dashboard Tab -->
     <div id="dashboard" class="tab-content active">
         <div class="dashboard-grid">
+
+            <!-- Total Customers -->
             <div class="stat-card">
                 <h3>Total Customers</h3>
-                <div class="stat-value">2,847</div>
+                <div class="stat-value" th:text="${totalCustomers}">0</div>
+                <!-- Optional: remove or replace with real % logic later -->
                 <div class="stat-change positive">+12% this month</div>
             </div>
+
+            <!-- Energy Consumed Today -->
             <div class="stat-card">
                 <h3>Energy Consumed Today</h3>
-                <div class="stat-value">1,245 kWh</div>
+                <div class="stat-value" th:text="${energyConsumedToday + ' kWh'}">0 kWh</div>
+                <!-- Optional: remove or replace with real comparison logic -->
                 <div class="stat-change negative">-3% vs yesterday</div>
             </div>
             <div class="stat-card">
-                <h3>Revenue Today</h3>
-                <div class="stat-value">$8,456</div>
-                <div class="stat-change positive">+8% vs yesterday</div>
+                <h3>Revenue This Month</h3>
+                <div class="stat-value" th:text="${#numbers.formatDecimal(revenueThisMonth, 1, 'COMMA', 2, 'POINT')}"></div>
+                <div th:classappend="${getPercentageGrowthVsLastMonth >= 0} ? ' positive' : ' negative'"
+                     th:text="${(getPercentageGrowthVsLastMonth >= 0 ? '+' : '')
+                + #numbers.formatDecimal(getPercentageGrowthVsLastMonth, 1, 2) + '%'}">
+                </div>
+
             </div>
             <div class="stat-card">
-                <h3>Active Meters</h3>
-                <div class="stat-value">2,834</div>
-                <div class="stat-change positive">99.5% uptime</div>
+                <h3>Revenue Today</h3>
+                <div class="stat-value" th:text="${#numbers.formatDecimal(revenueToday, 1, 'COMMA', 2, 'POINT')}"></div>
+                <div th:classappend="${getPercentageGrowthVsPreviousDay >= 0} ? ' positive' : ' negative'"
+                     th:text="${(getPercentageGrowthVsPreviousDay >= 0 ? '+' : '')
+                + #numbers.formatDecimal(getPercentageGrowthVsPreviousDay, 1, 2) + '%'}">
+                </div>
+
             </div>
         </div>
 
@@ -682,6 +696,31 @@
 </div>
 
 <script>
+    async function refreshDashboard() {
+        try {
+            // Fetch the current page HTML
+            const response = await fetch(window.location.href);
+            const html = await response.text();
+
+            // Create a temporary DOM to parse HTML
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // Get the new dashboard div
+            const newDashboard = doc.getElementById('dashboard');
+
+            // Replace the old dashboard div content
+            if (newDashboard) {
+                document.getElementById('dashboard').innerHTML = newDashboard.innerHTML;
+            }
+        } catch (err) {
+            console.error('Error refreshing dashboard:', err);
+        }
+    }
+
+    // Refresh every 5 seconds
+    setInterval(refreshDashboard, 5000);
+
     function switchTab(tabName) {
         // Hide all tab contents
         const tabContents = document.querySelectorAll('.tab-content');
@@ -709,15 +748,15 @@
     }
 
     // Simulate real-time updates
-    setInterval(() => {
-        // Update statistics with random values
-        const energyValue = document.querySelector('.stat-value');
-        if (energyValue) {
-            const currentValue = parseInt(energyValue.textContent.replace(/[^\d]/g, ''));
-            const newValue = currentValue + Math.floor(Math.random() * 20) - 10;
-            energyValue.textContent = newValue.toLocaleString() + ' kWh';
-        }
-    }, 5000);
+    // setInterval(() => {
+    //     // Update statistics with random values
+    //     const energyValue = document.querySelector('.stat-value');
+    //     if (energyValue) {
+    //         const currentValue = parseInt(energyValue.textContent.replace(/[^\d]/g, ''));
+    //         const newValue = currentValue + Math.floor(Math.random() * 20) - 10;
+    //         energyValue.textContent = newValue.toLocaleString() + ' kWh';
+    //     }
+    // }, 5000);
 
     // Initialize the dashboard
     document.addEventListener('DOMContentLoaded', function() {
